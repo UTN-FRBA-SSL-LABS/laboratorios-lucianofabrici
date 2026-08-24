@@ -74,14 +74,15 @@ Vas a ver el carrito con tres productos y su total.
 
 **P1** — Calculá a mano el total esperado: Leche ($350 x2) + Pan ($200 x3) + Queso ($1500 x1).
 
-> R: (escribí el total esperado)
+> R:2800
 
 **P2** — ¿El total que imprime el programa coincide con lo que calculaste? Si no coincide, ¿cuánto muestra?
 
-> R:
+> R:No coincide. El programa muestra 2050 porque carrito_total suma
+solo el precio unitario y no lo multiplica por la cantidad.
 
 ```
-TOTAL_PROGRAMA=
+TOTAL_PROGRAMA=2050
 ```
 _(escribí el número que imprimió el programa)_
 
@@ -131,7 +132,7 @@ Mirá el código en `tests/test_unitarios.c` para entender la estructura de un t
 
 **P3** — ¿Qué hace `carrito_init` y por qué es importante llamarla antes de usar el carrito?
 
-> R:
+> R: carrito_init pone cantidad en 0, dejando el carrito vacío. Es importante porque Carrito c; se declara en el stack sin inicializar: arranca con basura. Si cantidad tiene un valor cualquiera, carrito_agregar escribe en un índice equivocado y carrito_contar devuelve un número sin sentido.
 
 ---
 
@@ -166,10 +167,10 @@ make test_unitarios
 
 **P4** — ¿El nuevo test pasa o falla?
 
-> R:
+> R:Pasa. Con cantidad = 1 el total da 350, que es lo esperado. El bug de carrito_total queda oculto porque multiplicar por 1 o no multiplicar da el mismo resultado.
 
 ```
-TEST_PRECIO_UNITARIO_PASA=
+TEST_PRECIO_UNITARIO_PASA=SI
 ```
 _(SI o NO)_
 
@@ -195,10 +196,10 @@ Descomentá `/* test_total_con_cantidad(); */` en el `main()`, compilá y corré
 
 **P5** — ¿Este test pasa o falla? ¿Qué valor esperaba y qué obtuvo?
 
-> R:
+> R:Falla. Esperaba 700 (350 × 2) y obtuvo 350, porque carrito_total suma el precio unitario sin multiplicarlo por la cantidad.
 
 ```
-TEST_TOTAL_CANTIDAD_PASA=
+TEST_TOTAL_CANTIDAD_PASA=NO
 ```
 _(SI o NO)_
 
@@ -210,11 +211,11 @@ El test anterior encontró un bug en `carrito_total`. Abrí `src/carrito.c` y bu
 
 **P6** — ¿En qué línea está el bug y qué dice ese código?
 
-> R:
+> R:En la línea 22 de src/carrito.c, dentro del for de carrito_total. Decía total += c->items[i].precio;, o sea sumaba solo el precio unitario de cada producto e ignoraba por completo el campo cantidad.
 
 **P7** — ¿Qué debería hacer esa línea para calcular el total correctamente?
 
-> R:
+> R:Debería multiplicar el precio por la cantidad antes de sumarlo: total += c->items[i].precio * c->items[i].cantidad;. Así cada producto aporta su subtotal real al total del carrito.
 
 Corregí el bug. Luego volvé a compilar y correr:
 
@@ -232,7 +233,7 @@ cat salidas/test_unitarios.txt
 ```
 
 ```
-TESTS_UNITARIOS_PASAN=
+TESTS_UNITARIOS_PASAN=SI
 ```
 _(escribí SI si todos los tests pasan ahora)_
 
@@ -254,13 +255,13 @@ Descomentá `/* test_carrito_lleno(); */` en el `main()`, compilá y corré.
 
 **P8** — ¿El test pasa o falla? Si falla, ¿qué devuelve ese 5to `carrito_agregar`?
 
-> R:
+> R:Falla. El 5to carrito_agregar devuelve 1 en vez de 0: el carrito ya estaba lleno pero igual acepta el producto y lo escribe fuera del array. En mi caso el programa directamente abortó por corrupción de memoria.
 
 Si el test falló, encontraste el segundo bug. Buscá en `src/carrito.c` la condición del `if` dentro de `carrito_agregar`.
 
 **P9** — ¿Cuál es el operador incorrecto y cuál debería ser?
 
-> R:
+> R:La condición usa <= y debería ser <. Con c->cantidad <= MAX_ITEMS, cuando cantidad vale 4 la condición sigue siendo verdadera y escribe en items[4], un índice que no existe (los válidos son 0 a 3).
 
 Corregí el bug, volvé a compilar y verificá que todos los tests pasan.
 
@@ -301,7 +302,7 @@ cat salidas/test_integracion.txt
 ```
 
 ```
-TEST_INTEGRACION_PASA=
+TEST_INTEGRACION_PASA=SI
 ```
 _(SI o NO)_
 
@@ -338,10 +339,10 @@ Las líneas con `#####` nunca se ejecutaron — no están cubiertas por los test
 
 **P10** — ¿Hay alguna línea de `carrito.c` con `#####`? ¿Cuál y por qué no se ejecutó?
 
-> R:
+> R:Sí. La línea return total - (total * porcentaje / 100); de carrito_descuento aparece con #####. No se ejecutó porque make cobertura compila solo con test_unitarios.c
 
 ```
-COBERTURA_COMPLETA=
+COBERTURA_COMPLETA=NO
 ```
 _(SI si todas las líneas están cubiertas, NO si hay alguna con #####)_
 
@@ -366,12 +367,12 @@ _(SI si todas las líneas están cubiertas, NO si hay alguna con #####)_
 > R:
 
 ```
-BUG_EN_FUNCION_1=
+BUG_EN_FUNCION_1=carrito_total
 ```
 _(nombre de la función con el primer bug)_
 
 ```
-BUG_EN_FUNCION_2=
+BUG_EN_FUNCION_2=carrito_agregar
 ```
 _(nombre de la función con el segundo bug)_
 
