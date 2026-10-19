@@ -17,7 +17,12 @@ int main(void) {
     assert(ToInteger("-7") == -7);
     assert(ToInteger("100") == 100);
 
-    /* ── Operacion libre — agregar tests aca ────────────────────────────── */
+    /* ── ToDigitSum ─────────────────────────────────────────────────────── */
+    assert(ToDigitSum("0") == 0);
+    assert(ToDigitSum("7") == 7);
+    assert(ToDigitSum("123") == 6);
+    assert(ToDigitSum("-45") == 9);
+    assert(ToDigitSum("1000") == 1);
 
     return 0;
 }

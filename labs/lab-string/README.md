@@ -277,7 +277,7 @@ Los tests de `IsEmpty` ya están activos en `StringTest.c`. Corré `make test` y
 
 **P1** — `IsEmpty` podría haberse escrito también como `return s[0] == '\0'`. ¿Son equivalentes? ¿Por qué?
 
-> R:
+> R: Sí. En C `s[i]` equivale a `*(s + i)`, entonces `s[0]` es `*(s + 0)`, o sea `*s`. Las dos acceden al primer carácter.
 
 ---
 
@@ -328,14 +328,14 @@ make test
 
 **P2** — ¿Qué hace `s + 1`? ¿Por qué avanza al siguiente carácter y no al siguiente byte?
 
-> R:
+> R: Es aritmética de punteros: `s + 1` apunta al elemento siguiente, es decir a la subcadena `s[1..]`. El desplazamiento es en elementos del tipo apuntado (`sizeof(*s)`), no en bytes. Como `s` es `char *` y `sizeof(char) == 1`, avanza un carácter.
 
 **P3** — Si llamaras a `GetLength(NULL)`, ¿qué pasaría? ¿Por qué las precondiciones del contrato dicen `s != NULL`?
 
-> R:
+> R: Se desreferenciaría un puntero nulo en `IsEmpty` (`*s`), lo cual es comportamiento indefinido y normalmente termina en segmentation fault. La precondición `s != NULL` deja claro que es responsabilidad del llamador pasar una cadena válida, y la función no necesita verificarlo.
 
 ```
-GETLENGTH_PASA=
+GETLENGTH_PASA=SI
 ```
 _(escribí SI cuando todos los tests de GetLength pasen)_
 
@@ -367,7 +367,7 @@ El `while` termina cuando alguna de las dos cadenas llega a `'\0'`. Después dev
 
 **P4** — ¿Qué dos casos están mal cubiertos por `return 1`? Describí un ejemplo para cada uno.
 
-> R:
+> R: Cuando las cadenas tienen distinta longitud y una es prefijo de la otra: `AreEqual("abc", "ab")` (s2 termina primero) y `AreEqual("ab", "abc")` (s1 termina primero). En los dos casos el `while` termina y devuelve 1, aunque las cadenas son distintas.
 
 #### Corrección
 
@@ -384,7 +384,7 @@ make test
 ```
 
 ```
-AREEQUAL_PASA=
+AREEQUAL_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreEqual pasen)_
 
@@ -414,7 +414,7 @@ int AreDecimalDigits(const char *s) {
 
 **P5** — ¿Por qué la cadena vacía no debería considerarse un conjunto de dígitos decimales? Pensalo desde la especificación matemática.
 
-> R:
+> R: Porque la especificación define `AreDecimalDigits(ε) = 0`: se requiere al menos un carácter. La cadena vacía no representa ningún número, así que no puede considerarse una secuencia de dígitos decimales.
 
 #### Corrección
 
@@ -425,7 +425,7 @@ make test
 ```
 
 ```
-AREDECIMALDIGITS_PASA=
+AREDECIMALDIGITS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreDecimalDigits pasen)_
 
@@ -452,7 +452,7 @@ make test
 ```
 
 ```
-CONTAINS_PASA=
+CONTAINS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de Contains pasen)_
 
@@ -467,7 +467,7 @@ Antes de implementar, discutí con tu equipo:
 
 **P6** — Conclusión de la discusión:
 
-> R:
+> R: Es correcto tenerla en un módulo separado. `ToInteger` va de `String` a `Integer`, cruza la frontera entre tipos, mientras que las funciones de `String` operan solo sobre cadenas. Separarla en `Conversion` mantiene la cohesión de cada módulo.
 
 ---
 
@@ -494,7 +494,7 @@ int ToInteger(const char *s) {
 
 **P7** — El loop acumula correctamente el valor en `resultado`. ¿Qué está mal en el `return`?
 
-> R:
+> R: Devuelve solo `signo` (1 o -1) e ignora `resultado`. Debería devolver `signo * resultado`.
 
 #### Corrección
 
@@ -506,10 +506,10 @@ make test
 
 **P8** — La expresión `*s - '0'` convierte un carácter dígito al entero correspondiente. ¿Por qué funciona? ¿Qué devuelve `'3' - '0'`?
 
-> R:
+> R: Porque los caracteres `'0'` a `'9'` tienen códigos consecutivos (en ASCII, 48 a 57), y en C un `char` es un entero. Restar `'0'` da la distancia al cero, que es el valor del dígito. `'3' - '0'` = 51 - 48 = 3.
 
 ```
-TOINTEGER_PASA=
+TOINTEGER_PASA=SI
 ```
 _(escribí SI cuando todos los tests de ToInteger pasen)_
 
@@ -562,7 +562,7 @@ foo
 
 **P9** — ¿Por qué `(void)argc` suprime un warning? ¿Cuándo sería necesario usar `argc`?
 
-> R:
+> R: Con `-Wall -Wextra` el compilador avisa cuando un parámetro no se usa. `(void)argc` usa la variable y descarta el valor, indicando que es intencional. Sería necesario usar `argc` para validar la cantidad de argumentos (como en `mayorlongitud`) o para acceder a una posición en particular, por ejemplo el último argumento `argv[argc - 1]`.
 
 ---
 
@@ -589,7 +589,7 @@ Salida esperada:
 ```
 
 ```
-LONGITUDES_PASA=
+LONGITUDES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -616,7 +616,7 @@ make mayorlongitud
 ```
 
 ```
-MAYORLONGITUD_PASA=
+MAYORLONGITUD_PASA=SI
 ```
 _(SI o NO)_
 
@@ -635,7 +635,7 @@ make todosiguales
 ```
 
 ```
-TODOSIGUALES_PASA=
+TODOSIGUALES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -652,7 +652,7 @@ make suma
 ```
 
 ```
-SUMA_PASA=
+SUMA_PASA=SI
 ```
 _(SI o NO)_
 
@@ -662,15 +662,15 @@ _(SI o NO)_
 
 **P10** — `GetLength` es recursiva pero en C una llamada recursiva consume un stack frame. Si llamaras `GetLength` con un string de 1.000.000 de caracteres, ¿qué pasaría? ¿Cómo lo resolverías?
 
-> R:
+> R: Cada llamada ocupa un stack frame, así que con 1.000.000 de caracteres habría alrededor de un millón de llamadas anidadas y probablemente se produciría un stack overflow (segmentation fault). Se resuelve con una implementación iterativa, que recorre la cadena con un puntero hasta `'\0'` y usa memoria constante.
 
 **P11** — En la Parte III, todos los programas usan `char **arg` para iterar en vez de un índice entero. ¿Qué ventaja tiene este estilo? ¿Cuándo sería preferible usar el índice?
 
-> R:
+> R: Recorre el arreglo hasta el centinela `NULL`, igual que se recorre un string hasta `'\0'`, sin necesitar `argc` ni índices, y `*arg` ya es el argumento actual. El índice es preferible cuando importa la posición: acceder a un argumento puntual, recorrer de atrás para adelante o cuando el arreglo no tiene centinela.
 
 **P12** — En C, `"hola"` es un literal de tipo `const char *`. Si intentaras modificar un carácter con `s[0] = 'H'`, el comportamiento es indefinido. ¿Por qué? ¿En qué parte de la memoria viven los literales?
 
-> R:
+> R: Porque los literales se guardan en memoria estática de solo lectura (la sección `.rodata` del ejecutable), y además el compilador puede compartir el mismo literal entre distintos usos. Escribir ahí es comportamiento indefinido y en general produce un segmentation fault. Para tener una copia modificable se usa `char s[] = "hola";`, que copia los caracteres al stack.
 
 ---
 
@@ -678,10 +678,10 @@ _(SI o NO)_
 
 ### Checklist
 
-- [ ] `String.c` con todas las funciones implementadas y tests pasando
-- [ ] `Conversion.c` con `ToInteger` corregida y tests pasando
-- [ ] Los 5 programas funcionando (`make all`)
-- [ ] `make test` pasa localmente
+- [x] `String.c` con todas las funciones implementadas y tests pasando
+- [x] `Conversion.c` con `ToInteger` corregida y tests pasando
+- [x] Los 5 programas funcionando (`make all`)
+- [x] `make test` pasa localmente
 - [ ] Todo pusheado a `main`
 
 ### Verificación local

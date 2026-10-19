@@ -14,9 +14,15 @@ int ToInteger(const char *s) {
     if (*s == '-') { signo = -1; s++; }
     for (; *s != '\0'; s++)
         resultado = resultado * 10 + (*s - '0');
-    return signo; /* bug: falta multiplicar signo por resultado */
+    return signo * resultado;
 }
 
 /* ── Operacion libre ─────────────────────────────────────────────────────── */
 
-/* TODO */
+int ToDigitSum(const char *s) {
+    int suma = 0;
+    if (*s == '-') s++;
+    for (; *s != '\0'; s++)
+        suma += *s - '0';
+    return suma;
+}
